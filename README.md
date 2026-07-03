@@ -1,5 +1,10 @@
-# Awesome-Cosine-Annealing
-## Cosine Annealing in AI: Derivation, Progression, Variants, & Applications
+# 🌟 Awesome Cosine Annealing 📈
+
+<p align="center">
+  <img src="./assets/banner.svg" alt="Awesome Cosine Annealing Banner" width="100%">
+</p>
+
+## 🚀 Cosine Annealing in AI: Derivation, Progression, Variants, & Applications
 
 **Cosine Annealing** is a hardware-aware hyperparameter optimization paradigm that dynamically modulates the Learning Rate ($\eta$) of a neural network during backpropagation training loops. Introduced by Ilya Loshchilov and Frank Hutter in 2016 ("SGDR: Stochastic Gradient Descent with Warm Restarts"), Cosine Annealing replaces traditional rigid decay schedules (such as step decay or linear drops) with a continuous, smooth wave trajectory modeled on a cosine function. 
 
@@ -7,7 +12,7 @@ By systematically dropping the learning rate from a high peak velocity down to a
 
 ---
 
-## 1. Mathematical Derivation
+## 🧮 1. Mathematical Derivation
 
 The foundational formulation of Cosine Annealing derives the learning rate at a given training epoch or step $T_{cur}$ by mapping a half-period cosine curve bounded between a maximum targeted learning rate ($\eta_{max}$) and a minimum baseline floor ($\eta_{min}$).
 
@@ -42,7 +47,7 @@ To map the vertical range of this function (which spans from $1$ down to $-1$) t
 
 ---
 
-## 2. The Macro Chronological Evolution
+## ⏳ 2. The Macro Chronological Evolution
 
 The implementation of optimization learning rates has transitioned from rigid manual staircases to continuous waveforms, structured restarts, and modern warmup-fused pre-training schedulers.
 
@@ -63,7 +68,7 @@ flowchart LR
 
 ---
 
-## 3. Core Structural & Chronological Schedulers
+## ⚙️ 3. Core Structural & Chronological Schedulers
 
 Cosine Annealing frameworks are categorized based on how the period windows are dynamically adjusted and recycled across successive optimization runs.
 
@@ -82,7 +87,7 @@ flowchart LR
 
 ---
 
-## 4. Production Engineering Challenges & Cluster Scaling Mitigations
+## 🛠️ 4. Production Engineering Challenges & Cluster Scaling Mitigations
 
 Deploying continuous wave optimizers across high-volume distributed clusters introduces critical coordination and mixed-precision constraints.
 
@@ -93,7 +98,7 @@ Deploying continuous wave optimizers across high-volume distributed clusters int
 
 ---
 
-## 5. Frontier Real-World AI Applications
+## 🌐 5. Frontier Real-World AI Applications
 
 | Application | Details | Year First Used | Paper Link |
 | :--- | :--- | :--- | :--- |
@@ -103,7 +108,7 @@ Deploying continuous wave optimizers across high-volume distributed clusters int
 
 ---
 
-## References
+## 📚 References
 1. Sutskever, I., et al. (2013). On the importance of initialization and momentum in deep learning. *International Conference on Machine Learning (ICML)*, 1139-1147.
 2. Kingma, D. P., & Ba, J. (2014). Adam: A method for stochastic optimization. *arXiv preprint arXiv:1412.6980*.
 3. Loshchilov, I., & Hutter, F. (2016). SGDR: Stochastic gradient descent with warm restarts. *International Conference on Learning Representations (ICLR)*.
