@@ -4,6 +4,16 @@
   <img src="./assets/banner.svg" alt="Awesome Cosine Annealing Banner" width="100%">
 </p>
 
+<p align="center">
+  <a href="https://github.com/ishandutta2007/Awesome-Awesome-Awesome"><img src="https://img.shields.io/badge/Awesome-%E2%9C%94-blueviolet?style=flat-square&logo=github" alt="Awesome"/></a><a href="https://discord.gg/jc4xtF58Ve"><img src="https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord" /></a>
+</p>
+
+<!--
+SEO Optimization Details:
+- Focus: Cosine Annealing, Learning Rate Schedulers, SGDR, Deep Learning Optimizers, Warm Restarts, PyTorch Schedulers, Foundational Model Pre-training
+- Description: An exhaustive reference collection mapping the progression, mathematical derivations, engineering mitigations, and modern applications of Cosine Annealing in Deep Learning.
+-->
+
 ## 🚀 Cosine Annealing in AI: Derivation, Progression, Variants, & Applications
 
 **Cosine Annealing** is a hardware-aware hyperparameter optimization paradigm that dynamically modulates the Learning Rate ($\eta$) of a neural network during backpropagation training loops. Introduced by Ilya Loshchilov and Frank Hutter in 2016 ("SGDR: Stochastic Gradient Descent with Warm Restarts"), Cosine Annealing replaces traditional rigid decay schedules (such as step decay or linear drops) with a continuous, smooth wave trajectory modeled on a cosine function. 
