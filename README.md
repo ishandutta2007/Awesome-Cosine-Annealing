@@ -75,26 +75,26 @@ flowchart LR
 
 Cosine Annealing frameworks are categorized based on how the period windows are dynamically adjusted and recycled across successive optimization runs.
 
-### A. Monotonic Cosine Decay (No Restarts)
-*   **Mechanism:** Runs across a single, unbroken timeline where $T_{max}$ matches the total epoch budget of the complete training run.
-*   **Behavior:** The baseline default standard for pre-training transformers, steadily cooling parameter updates until the loss curve plateaus cleanly.
+- ### A. Monotonic Cosine Decay (No Restarts)
+	*   **Mechanism:** Runs across a single, unbroken timeline where $T_{max}$ matches the total epoch budget of the complete training run.
+	*   **Behavior:** The baseline default standard for pre-training transformers, steadily cooling parameter updates until the loss curve plateaus cleanly.
 
-### B. Cosine Annealing with Warm Restarts (SGDR Class)
-*   **Mechanism:** Cycles the learning rate across successive periods ($T_i$). When the current step hits the local horizon, the schedule resets $T_{cur} \leftarrow 0$, initializing a new cosine cycle.
-*   **Period Expansion ($T_{mult}$):** To prevent the model from cycling chaotically, modern variants scale the length of each successive period using a multiplier (typically $T_{mult} = 2$), doubling the training window after every restart:
-```
-    $$T_i = T_{0} \times (T_{mult})^i$$
-```
+- ### B. Cosine Annealing with Warm Restarts (SGDR Class)
+	*   **Mechanism:** Cycles the learning rate across successive periods ($T_i$). When the current step hits the local horizon, the schedule resets $T_{cur} \leftarrow 0$, initializing a new cosine cycle.
+	*   **Period Expansion ($T_{mult}$):** To prevent the model from cycling chaotically, modern variants scale the length of each successive period using a multiplier (typically $T_{mult} = 2$), doubling the training window after every restart:
+	```
+	    $$T_i = T_{0} \times (T_{mult})^i$$
+	```
 
-```mermaid
-flowchart LR
-    A["Cycle 0 (T₀)<br/>High η → Cosine Decay → Restart"]
-    --> B["Cycle 1 (2T₀)<br/>High η → Longer Cosine Decay → Restart"]
-    --> C["Cycle 2 (4T₀)<br/>High η → Even Longer Cosine Decay"]
-```
+	```mermaid
+	flowchart LR
+	    A["Cycle 0 (T₀)<br/>High η → Cosine Decay → Restart"]
+	    --> B["Cycle 1 (2T₀)<br/>High η → Longer Cosine Decay → Restart"]
+	    --> C["Cycle 2 (4T₀)<br/>High η → Even Longer Cosine Decay"]
+	```
 
-### C. Cosine Annealing with Linear Warmup
-*   **Mechanism:** Injects a programmatic ramp-up layer spanning the first $T_{warmup}$ steps (typically 1% to 5% of total tokens). The learning rate climbs linearly from 0 to $\eta_{max}$ before entering the standard cosine equation.
+- ### C. Cosine Annealing with Linear Warmup
+	*   **Mechanism:** Injects a programmatic ramp-up layer spanning the first $T_{warmup}$ steps (typically 1% to 5% of total tokens). The learning rate climbs linearly from 0 to $\eta_{max}$ before entering the standard cosine equation.
 
 ---
 
