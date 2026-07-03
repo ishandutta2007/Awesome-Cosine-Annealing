@@ -46,8 +46,6 @@ To map the vertical range of this function (which spans from $1$ down to $-1$) t
 
 The implementation of optimization learning rates has transitioned from rigid manual staircases to continuous waveforms, structured restarts, and modern warmup-fused pre-training schedulers.
 
-
-
 ```mermaid
 flowchart LR
     A["Rigid Step / Exponential Decay<br/>(Abrupt Learning-Rate Transitions)"]
@@ -56,18 +54,12 @@ flowchart LR
     --> D["Modern Pre-Training Schedules<br/>(Linear Warmup + Cosine Decay)"]
 ```
 
-
-*   **The Discontinuous Step & Heuristic Decay Era (Traditional ML, Pre-2016)**
-    *   *Concept:* The structural baseline. Learning rates were scaled down manually using rigid step-staircases (e.g., dropping the learning rate by a factor of 10 every 30 epochs) or smooth exponential curves ($e^{-\lambda t}$).
-    *   *Limitation:* Heavy hyperparameter tuning tax and parameter gradient shocks. Step decay required manual intervention, and the sudden, instantaneous drop in learning rate introduced severe numerical shocks to the hidden layers, often destabilizing or stagnating convergence.
-*   **The Continuous Waveform Revolution (Vanilla Cosine Annealing, 2016)**
-    *   *Concept:* Formally established by Loshchilov and Hutter. It replaced abrupt drops with a smooth mathematical wave. Because the function is monotonically decreasing and continuously differentiable, weight updates decelerate smoothly as they approach local minima, mimicking the cooling physics of thermodynamic annealing.
-*   **The Cyclic Restarts Era (SGDR / Stochastic Optimization with Restarts)**
-    *   *Concept:* Addressed the problem of getting trapped in sub-optimal local minima or sharp saddle zones. Instead of terminating the run when the learning rate hits its floor ($\eta_{min}$), **SGDR** abruptly pops the learning rate back up to peak velocity ($\eta_{max}$), launching a new, expanded cosine period window.
-    *   *Significance:* The sudden learning rate burst acts as a controlled kinetic explosion, shaking the model parameters out of local minima to find deeper, wider, and more robust global minima across the loss landscape.
-*   **The Linear Warmup & Unified Transformer Pre-Training Era (~2020–Present)**
-    *   *Concept:* The modern state-of-the-art framework driving frontier Large Language Models (such as Llama 3 and DeepSeek-V3). It couples Cosine Annealing with a **Linear Warmup phase** at step zero.
-    *   *Significance:* Prevents parameter explosion during the early, highly unstable steps of training over trillions of tokens by climbing linearly from zero to peak velocity before activating a monotonic cosine decay toward the target context horizon.
+| Era / Concept | Details | Year First Used | Paper Link |
+| :--- | :--- | :--- | :--- |
+| **The Discontinuous Step & Heuristic Decay Era (Traditional ML, Pre-2016)** | **Concept:** The structural baseline. Learning rates were scaled down manually using rigid step-staircases (e.g., dropping the learning rate by a factor of 10 every 30 epochs) or smooth exponential curves ($e^{-\lambda t}$).<br><br>**Limitation:** Heavy hyperparameter tuning tax and parameter gradient shocks. Step decay required manual intervention, and the sudden, instantaneous drop in learning rate introduced severe numerical shocks to the hidden layers, often destabilizing or stagnating convergence. | 2013 | [Sutskever et al. (2013)](https://proceedings.mlr.press/v28/sutskever13.pdf) |
+| **The Continuous Waveform Revolution (Vanilla Cosine Annealing, 2016)** | **Concept:** Formally established by Loshchilov and Hutter. It replaced abrupt drops with a smooth mathematical wave. Because the function is monotonically decreasing and continuously differentiable, weight updates decelerate smoothly as they approach local minima, mimicking the cooling physics of thermodynamic annealing. | 2016 | [Loshchilov & Hutter (2016)](https://arxiv.org/abs/1608.03983) |
+| **The Cyclic Restarts Era (SGDR / Stochastic Optimization with Restarts)** | **Concept:** Addressed the problem of getting trapped in sub-optimal local minima or sharp saddle zones. Instead of terminating the run when the learning rate hits its floor ($\eta_{min}$), **SGDR** abruptly pops the learning rate back up to peak velocity ($\eta_{max}$), launching a new, expanded cosine period window.<br><br>**Significance:** The sudden learning rate burst acts as a controlled kinetic explosion, shaking the model parameters out of local minima to find deeper, wider, and more robust global minima across the loss landscape. | 2016 | [Loshchilov & Hutter (2016)](https://arxiv.org/abs/1608.03983) |
+| **The Linear Warmup & Unified Transformer Pre-Training Era (~2020–Present)** | **Concept:** The modern state-of-the-art framework driving frontier Large Language Models (such as Llama 3 and DeepSeek-V3). It couples Cosine Annealing with a **Linear Warmup phase** at step zero.<br><br>**Significance:** Prevents parameter explosion during the early, highly unstable steps of training over trillions of tokens by climbing linearly from zero to peak velocity before activating a monotonic cosine decay toward the target context horizon. | 2017 | [Vaswani et al. (2017)](https://arxiv.org/abs/1706.03762) |
 
 ---
 
@@ -75,26 +67,18 @@ flowchart LR
 
 Cosine Annealing frameworks are categorized based on how the period windows are dynamically adjusted and recycled across successive optimization runs.
 
-- ### A. Monotonic Cosine Decay (No Restarts)
-	*   **Mechanism:** Runs across a single, unbroken timeline where $T_{max}$ matches the total epoch budget of the complete training run.
-	*   **Behavior:** The baseline default standard for pre-training transformers, steadily cooling parameter updates until the loss curve plateaus cleanly.
+| Scheduler Variant | Description & Details | Year First Used | Paper Link |
+| :--- | :--- | :--- | :--- |
+| **Monotonic Cosine Decay (No Restarts)** | **Mechanism:** Runs across a single, unbroken timeline where $T_{max}$ matches the total epoch budget of the complete training run.<br><br>**Behavior:** The baseline default standard for pre-training transformers, steadily cooling parameter updates until the loss curve plateaus cleanly. | 2016 | [Loshchilov & Hutter (2016)](https://arxiv.org/abs/1608.03983) |
+| **Cosine Annealing with Warm Restarts (SGDR Class)** | **Mechanism:** Cycles the learning rate across successive periods ($T_i$). When the current step hits the local horizon, the schedule resets $T_{cur} \leftarrow 0$, initializing a new cosine cycle.<br><br>**Period Expansion ($T_{mult}$):** To prevent the model from cycling chaotically, modern variants scale the length of each successive period using a multiplier (typically $T_{mult} = 2$), doubling the training window after every restart:<br><br>$$T_i = T_{0} \times (T_{mult})^i$$ | 2016 | [Loshchilov & Hutter (2016)](https://arxiv.org/abs/1608.03983) |
+| **Cosine Annealing with Linear Warmup** | **Mechanism:** Injects a programmatic ramp-up layer spanning the first $T_{warmup}$ steps (typically 1% to 5% of total tokens). The learning rate climbs linearly from 0 to $\eta_{max}$ before entering the standard cosine equation. | 2017 | [Vaswani et al. (2017)](https://arxiv.org/abs/1706.03762) |
 
-- ### B. Cosine Annealing with Warm Restarts (SGDR Class)
-	*   **Mechanism:** Cycles the learning rate across successive periods ($T_i$). When the current step hits the local horizon, the schedule resets $T_{cur} \leftarrow 0$, initializing a new cosine cycle.
-	*   **Period Expansion ($T_{mult}$):** To prevent the model from cycling chaotically, modern variants scale the length of each successive period using a multiplier (typically $T_{mult} = 2$), doubling the training window after every restart:
-	```
-	    $$T_i = T_{0} \times (T_{mult})^i$$
-	```
-
-	```mermaid
-	flowchart LR
-	    A["Cycle 0 (T₀)<br/>High η → Cosine Decay → Restart"]
-	    --> B["Cycle 1 (2T₀)<br/>High η → Longer Cosine Decay → Restart"]
-	    --> C["Cycle 2 (4T₀)<br/>High η → Even Longer Cosine Decay"]
-	```
-
-- ### C. Cosine Annealing with Linear Warmup
-	*   **Mechanism:** Injects a programmatic ramp-up layer spanning the first $T_{warmup}$ steps (typically 1% to 5% of total tokens). The learning rate climbs linearly from 0 to $\eta_{max}$ before entering the standard cosine equation.
+```mermaid
+flowchart LR
+    A["Cycle 0 (T₀)<br/>High η → Cosine Decay → Restart"]
+    --> B["Cycle 1 (2T₀)<br/>High η → Longer Cosine Decay → Restart"]
+    --> C["Cycle 2 (4T₀)<br/>High η → Even Longer Cosine Decay"]
+```
 
 ---
 
@@ -102,23 +86,20 @@ Cosine Annealing frameworks are categorized based on how the period windows are 
 
 Deploying continuous wave optimizers across high-volume distributed clusters introduces critical coordination and mixed-precision constraints.
 
-*   **The Master Weight Precision and Underflow Hazard**
-    *   *The Problem:* During the terminal steps of a cosine annealing curve, the learning rate drops to ultra-low values (e.g., $\eta \rightarrow 10^{-6}$). If a model executes its training run using low-precision 16-bit floats (FP16 or BF16), multiplying tiny gradients by an infinitesimal learning rate causes numerical **underflow errors**, zeroing out parameter updates completely.
-    *   *Mitigation:* Implementing a strict **FP32 Master Weight Optimizer configuration (AdamW integration)** [INDEX: 11]. While forward passes execute in high-speed 16-bit matrices, the optimizer caches and updates a copy of the model weights in full 32-bit floating-point precision to protect low-bit learning increments.
-*   **The Checkpoint Abort and Schedule Unalignment Boundary**
-    *   *The Problem:* Standard Cosine Annealing requires a hardcoded target boundary ($T_{max}$). If a massive, multi-week distributed cluster run crashes midway or is cut short due to infrastructure changes, the learning rate will be stuck at an un-converged high velocity, degrading model capabilities.
-    *   *Mitigation:* Porting configurations over to **Infinite / Continuous Learning Rate Schedulers**, which maintain a steady optimization velocity over open-ended token durations, executing a short, manual 1-epoch cosine cooldown pass only when the team decides to finalize the model weights.
+| Challenge | Details | Year First Used | Paper Link |
+| :--- | :--- | :--- | :--- |
+| **The Master Weight Precision and Underflow Hazard** | **The Problem:** During the terminal steps of a cosine annealing curve, the learning rate drops to ultra-low values (e.g., $\eta \rightarrow 10^{-6}$). If a model executes its training run using low-precision 16-bit floats (FP16 or BF16), multiplying tiny gradients by an infinitesimal learning rate causes numerical **underflow errors**, zeroing out parameter updates completely.<br><br>**Mitigation:** Implementing a strict **FP32 Master Weight Optimizer configuration (AdamW integration)** [INDEX: 11]. While forward passes execute in high-speed 16-bit matrices, the optimizer caches and updates a copy of the model weights in full 32-bit floating-point precision to protect low-bit learning increments. | 2017 | [Micikevicius et al. (2017)](https://arxiv.org/abs/1710.03740) |
+| **The Checkpoint Abort and Schedule Unalignment Boundary** | **The Problem:** Standard Cosine Annealing requires a hardcoded target boundary ($T_{max}$). If a massive, multi-week distributed cluster run crashes midway or is cut short due to infrastructure changes, the learning rate will be stuck at an un-converged high velocity, degrading model capabilities.<br><br>**Mitigation:** Porting configurations over to **Infinite / Continuous Learning Rate Schedulers**, which maintain a steady optimization velocity over open-ended token durations, executing a short, manual 1-epoch cosine cooldown pass only when the team decides to finalize the model weights. | 2024 | [Llama 3 (AI@Meta, 2024)](https://arxiv.org/abs/2407.21783) |
 
 ---
 
 ## 5. Frontier Real-World AI Applications
 
-*   **Pre-Training Web-Scale Foundational Transformers (Llama / Mistral / DeepSeek)**
-    *   *Application:* Serves as the primary learning rate scheduler managing corporate foundation model pipelines [INDEX: 11]. Linear warmup phases stabilize early layer parameters as they digest diverse multilingual tokens, while monotonic cosine annealing ensures smooth cross-entropy loss convergence across multi-trillion token sets.
-*   **High-Resolution Diffusion and Flow-Matching Synthesis Loops**
-    *   *Application:* Optimizes generative image and video platforms (such as FLUX.1 or Stable Diffusion). Cosine Annealing allows deep text-image cross-attention blocks to balance broad macro-geometric composition learning with microscopic high-frequency image texture generation stably over long epoch profiles.
-*   **Distributed Low-Rank Post-Training Alignment Sprints (LoRA / QLoRA)**
-    *   *Application:* Tailors models over domain-specific enterprise datasets (such as private corporate legal or financial profiles). Fused 8-bit AdamW optimizers utilize cosine annealing with warm restarts to quickly navigate non-convex local loss fields, adapting specialized behavioral personas within constrained compute infrastructure limits.
+| Application | Details | Year First Used | Paper Link |
+| :--- | :--- | :--- | :--- |
+| **Pre-Training Web-Scale Foundational Transformers (Llama / Mistral / DeepSeek)** | **Application:** Serves as the primary learning rate scheduler managing corporate foundation model pipelines [INDEX: 11]. Linear warmup phases stabilize early layer parameters as they digest diverse multilingual tokens, while monotonic cosine annealing ensures smooth cross-entropy loss convergence across multi-trillion token sets. | 2023 | [Llama (Touvron et al., 2023)](https://arxiv.org/abs/2302.13971) |
+| **High-Resolution Diffusion and Flow-Matching Synthesis Loops** | **Application:** Optimizes generative image and video platforms (such as FLUX.1 or Stable Diffusion). Cosine Annealing allows deep text-image cross-attention blocks to balance broad macro-geometric composition learning with microscopic high-frequency image texture generation stably over long epoch profiles. | 2020 | [DDPM (Ho et al., 2020)](https://arxiv.org/abs/2006.11239) |
+| **Distributed Low-Rank Post-Training Alignment Sprints (LoRA / QLoRA)** | **Application:** Tailors models over domain-specific enterprise datasets (such as private corporate legal or financial profiles). Fused 8-bit AdamW optimizers utilize cosine annealing with warm restarts to quickly navigate non-convex local loss fields, adapting specialized behavioral personas within constrained compute infrastructure limits. | 2021 | [LoRA (Hu et al., 2021)](https://arxiv.org/abs/2106.09685) |
 
 ---
 
