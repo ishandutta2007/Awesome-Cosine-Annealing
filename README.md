@@ -135,6 +135,19 @@ To advance this documentation repository, infrastructure workspace, or post-trai
 
 ***
 
+##  Star History
+<div align="center">
+<a href="https://www.star-history.com/?repos=ishandutta2007%2FAwesome-Cosine-Annealing&type=date&legend=bottom-right">
+<picture>
+<source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=ishandutta2007/Awesome-Cosine-Annealing&type=date&theme=dark&legend=bottom-right" />
+<source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=ishandutta2007/Awesome-Cosine-Annealing&type=date&legend=bottom-right" />
+<img alt="Star History Chart" src="https://api.star-history.com/chart?repos=ishandutta2007/Awesome-Cosine-Annealing&type=date&legend=bottom-right" />
+</picture>
+</a>
+</div>
+
+***
+
 **Follow-Up Navigation Matrix:**
 
 To assist with your documentation repository setup, let me know how you would like to proceed by choosing one of the options below:
